@@ -1,63 +1,69 @@
-import React from 'react';
+import React, {useState, FormEvent} from 'react';
 import { FiChevronRight } from 'react-icons/fi'
+
+import api from '../../services/api';
+
 import logoImg from '../../assets/logo.svg';
-import Repository from '../Repository';
+
 
 import { Title, Form, Repositories} from './styles';
+import Repository from '../Repository';
 
+interface Repository {
+   fullname: string;
+   description: string;
+   owner: {
+      login: string;
+      avatar_url: string;
+   }
+}
 const Dashboard: React.FC = () => {
+   const [repositories, setRepositories] = useState<Repository[]>([]);
+   const [newRepo, setNewRepo] = useState('');
+
+   async function handleAddRepository(event: FormEvent<HTMLFormElement>): Promise<void>{
+      event.preventDefault();
+
+      const response = await api.get<Repository>(`repos/${newRepo}`);
+
+      const repository =  response.data;
+      setRepositories([...repositories, repository]);
+   }
+
+
   return(
      <>
           <img src={logoImg} alt='Github Explorer'/>
           <Title>Explore repositórios no Github</Title>
 
-          <Form>
-               <input placeholder="Digite o nome do repositório"/>
+          <Form onSubmit = { handleAddRepository }>
+               <input
+                  value={newRepo}
+                  onChange={e => setNewRepo(e.target.value)}
+                  placeholder="Digite o nome do repositório"
+                  />
                <button type='submit'>Pesquisar</button>
           </Form>
 
           <Repositories>
-             <a href="teste">
+
+             {repositories.map(repository =>{
+                <a key={repository.fullname} href="teste">
                 <img
-                  src="https://avatars0.githubusercontent.com/u/39867221?s=460&u=3c4a409ececaa80ea565dd6b94edec6e4f203d38&v=4"
-                  alt="Samuel Jacome"
+                  src={repository.owner.avatar_url}
+                  alt={repository.owner.login}
                 />
 
                 <div>
-                   <strong>samueljacome/realmDB</strong>
-                   <p>Offline first</p>
+                   <strong>{repository.fullname}</strong>
+                   <p>{repository.description}</p>
                 </div>
                 <FiChevronRight size={20}/>
 
              </a>
 
-             <a href="teste">
-                <img
-                  src="https://avatars0.githubusercontent.com/u/39867221?s=460&u=3c4a409ececaa80ea565dd6b94edec6e4f203d38&v=4"
-                  alt="Samuel Jacome"
-                />
+             })}
 
-                <div>
-                   <strong>samueljacome/realmDB</strong>
-                   <p>Offline first</p>
-                </div>
-                <FiChevronRight size={20}/>
-
-             </a>
-
-             <a href="teste">
-                <img
-                  src="https://avatars0.githubusercontent.com/u/39867221?s=460&u=3c4a409ececaa80ea565dd6b94edec6e4f203d38&v=4"
-                  alt="Samuel Jacome"
-                />
-
-                <div>
-                   <strong>samueljacome/realmDB</strong>
-                   <p>Offline first</p>
-                </div>
-                <FiChevronRight size={20}/>
-
-             </a>
 
           </Repositories>
      </>
