@@ -6,7 +6,7 @@ import api from '../../services/api';
 import logoImg from '../../assets/logo.svg';
 
 
-import { Title, Form, Repositories} from './styles';
+import { Title, Form, Repositories, Error} from './styles';
 import Repository from '../Repository';
 
 interface Repository {
@@ -20,14 +20,28 @@ interface Repository {
 const Dashboard: React.FC = () => {
    const [repositories, setRepositories] = useState<Repository[]>([]);
    const [newRepo, setNewRepo] = useState('');
+   const [inputError, setInputError] = useState('');
 
    async function handleAddRepository(event: FormEvent<HTMLFormElement>): Promise<void>{
       event.preventDefault();
+      if (!newRepo) {
+         setInputError('Digite o autor/nome do repositório')
+      }
+      try{
+
+
+
 
       const response = await api.get<Repository>(`repos/${newRepo}`);
 
       const repository =  response.data;
       setRepositories([...repositories, repository]);
+      setNewRepo('');
+      }catch(err)
+      {
+         setInputError('Erro na busca por esse repositorio')
+
+      }
    }
 
 
@@ -44,10 +58,12 @@ const Dashboard: React.FC = () => {
                   />
                <button type='submit'>Pesquisar</button>
           </Form>
+          {inputError!= '' && <Error>{inputError}</Error>}
+
 
           <Repositories>
 
-             {repositories.map(repository =>{
+             {repositories.map(repository =>(
                 <a key={repository.fullname} href="teste">
                 <img
                   src={repository.owner.avatar_url}
@@ -62,7 +78,7 @@ const Dashboard: React.FC = () => {
 
              </a>
 
-             })}
+             ))}
 
 
           </Repositories>

@@ -97,3 +97,6 @@ export const Repositories = styled.div`
 
 `;
 
+export const Error = styled.p`
+
+`;
